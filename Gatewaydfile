@@ -1,0 +1,10 @@
+var WizardPlugin = require('gatewayd-setup-wizard-plugin');
+
+module.exports = function(gatewayd) {
+  var wizardPlugin = new WizardPlugin();
+
+  wizardPlugin.initialize({
+    gatewayd: gatewayd
+  });
+}
+
