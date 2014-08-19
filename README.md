@@ -11,8 +11,6 @@ In the Gatewaydfile of your gatewayd installation:
 
     var WizardPlugin = require('gatewayd-setup-wizard-plugin');
 
-    var WizardPlugin = require('gatewayd-setup-wizard-plugin');
-
     module.exports = function(gatewayd) {
       var wizardPlugin = new WizardPlugin({
         gatewayd: gatewayd
