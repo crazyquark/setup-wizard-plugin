@@ -1,0 +1,8 @@
+{
+  "name": "gatwayd-setup-wizard",
+  "version": "0.0.1",
+  "dependencies": {
+    "body-parser": "^1.6.5",
+    "express": "^4.8.4"
+  }
+}
