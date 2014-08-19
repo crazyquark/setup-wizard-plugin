@@ -11,14 +11,16 @@ In the Gatewaydfile of your gatewayd installation:
 
     var WizardPlugin = require('gatewayd-setup-wizard-plugin');
 
-    module.exports = function(gatewayd) {
-      var wizardPlugin = new WizardPlugin();
+    var WizardPlugin = require('gatewayd-setup-wizard-plugin');
 
-      wizardPlugin.initialize({
-        gatewayd: gatewayd,
-        path: '/setup-wizard'
+    module.exports = function(gatewayd) {
+      var wizardPlugin = new WizardPlugin({
+        gatewayd: gatewayd
       });
-    }
+
+      gatewayd.server.use('/', wizardPlugin.router);
+
+    };
 
 ### Raison d'être
 
