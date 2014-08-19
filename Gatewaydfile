@@ -1,10 +1,10 @@
 var WizardPlugin = require('gatewayd-setup-wizard-plugin');
 
 module.exports = function(gatewayd) {
-  var wizardPlugin = new WizardPlugin();
-
-  wizardPlugin.initialize({
+  var wizardPlugin = new WizardPlugin({
     gatewayd: gatewayd
   });
-}
 
+  gatewayd.server.use('/', wizardPlugin.router);
+
+};
