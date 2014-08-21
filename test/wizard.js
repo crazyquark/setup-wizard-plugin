@@ -2,7 +2,11 @@ var WizardPlugin = require(__dirname+'/../lib/wizard.js');
 var gatewayd = require('/Users/abiy/code/gatewayd');
 var assert = require('assert');
 
+COLD_WALLET_SECRET = process.env.RIPPLE_ACCOUNT_SECRET;
+
 describe('Wizard setup', function(){
+
+
   var wizardPligin;
   before(function(done){
     wizardPligin = new WizardPlugin({
@@ -22,7 +26,7 @@ describe('Wizard setup', function(){
 
   });
 
-  it.skip('should set the database url', function(done) {
+  it('should set the database url', function(done) {
     wizardPligin._setDatabaseUrl({
       database_url: 'postgres://postgres:password@localhost:5432/ripple_gateway'
     }, function(error, response){
@@ -36,7 +40,7 @@ describe('Wizard setup', function(){
   it.skip('should set a cold wallet', function(done){
     wizardPligin._setColdWallet({
       ripple_address: 'rMinhWxZz4jeHoJGyddtmwg6dWhyqQKtJz'
-      }, function(error, response){
+    }, function(error, response){
       console.log('error', error);
       console.log('response', response);
       done();
@@ -56,8 +60,9 @@ describe('Wizard setup', function(){
 
   it.skip('should fund the hot wallet', function(done) {
     wizardPligin._fundHotWallet({
-      cold_wallet_secret: ''
+      cold_wallet_secret: COLD_WALLET_SECRET
     }, function(error, response){
+      assert(!error);
       console.log('error', error);
       console.log('response', response);
       done();
@@ -65,49 +70,53 @@ describe('Wizard setup', function(){
 
   });
 
-  it.skip('should set the last payment hash', function(done) {
-    wizardPligin._setLastPaymentHash({
-      cold_wallet_secret: ''
-    }, function(error, response){
-      console.log('error', error);
-      console.log('response', response);
+  it('should set the last payment hash', function(done) {
+    wizardPligin._setLastPaymentHash(function(error, response){
+      assert(!error);
+      assert(response);
+      assert(response.hash);
       done();
     });
   });
 
-  it.skip('should add currency', function(done) {
-    wizardPligin._addCurrency({
-      cold_wallet_secret: ''
-    }, function(error, response){
-      console.log('error', error);
-      console.log('response', response);
+  it('should add currency', function(done) {
+
+    wizardPligin._addCurrency({ currencies : { CAT: 0 }}, function(error, response){
+      assert(!error);
+      assert(response.currencies.hasOwnProperty('CAT'));
       done();
     });
   });
+
 
   it.skip('should update ripple account settings', function(done) {
+    this.timeout(10000);
     wizardPligin._updateAccountSettings({
-      cold_wallet_secret: ''
+      cold_wallet_secret: COLD_WALLET_SECRET
     }, function(error, response){
       console.log('error', error);
       console.log('response', response);
       done();
     });
+
   });
 
-  it.skip('should set trust line between cold and hot wallet', function(done) {
+  it('should set trust line between cold and hot wallet', function(done) {
+    this.timeout(20000);
     wizardPligin._setTrustLine({
-      cold_wallet_secret: ''
+      currencies: { CAT: 120, TES: 190 }
     }, function(error, response){
-      console.log('error', error);
-      console.log('response', response);
+      assert(!error);
+      assert(response);
+      assert.strictEqual(response.trust_lines.length > 0);
       done();
     });
   });
 
-  it.skip('should issue specified currencies', function(done) {
+  it('should issue specified currencies', function(done) {
     wizardPligin._issueCurrency({
-      cold_wallet_secret: ''
+      currencies: { POP: 120 },
+      cold_wallet_secret: COLD_WALLET_SECRET
     }, function(error, response){
       console.log('error', error);
       console.log('response', response);
@@ -115,15 +124,20 @@ describe('Wizard setup', function(){
     });
   });
 
-  it.skip('should set key', function(done) {
+  it('should set key', function(done) {
     wizardPligin._setKey(function(error, response){
-      console.log('error', error);
+      assert(!error);
+      assert(response.admin_login.hasOwnProperty('username'));
+      assert(response.admin_login.hasOwnProperty('password'));
+      assert(response.admin_login.username);
+      assert(response.admin_login.password);
       console.log('response', response);
       done();
     });
   });
 
   after(function(done){
+
     done();
 
   });
