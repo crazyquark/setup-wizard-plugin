@@ -1,16 +1,17 @@
 var express = require('express');
-var Wizard = require(__dirname+'/lib/wizard');
+var WizardController = require(__dirname+'/app/controllers/wizard_controller');
 
 
 function WizardPlugin (options) {
   this.router = new express.Router();
 
-  var wizard = new Wizard({
+  var wizardController = new WizardController({
     gatewayd: options.gatewayd
   });
 
   this.router.use('/wizard', express.static(__dirname+'/public'));
-  this.router.post('/wizard/setup', wizard.setup);
+  this.router.get('/wizard/info', wizardController.info.bind(wizardController));
+  this.router.post('/wizard/setup', wizardController.setup.bind(wizardController));
 }
 
 module.exports = WizardPlugin;
