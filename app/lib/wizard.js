@@ -21,12 +21,9 @@ function Wizard (options) {
  */
 
 
-Wizard.prototype.setup = function(request, response) {
+Wizard.prototype.setup = function(config, callback) {
   // do the wizard dance
-  response.status(200)
-    .send({
-      success: true
-    });
+
 
 }
 
