@@ -1,11 +1,21 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="en">
+<html lang="en" ng-app="gatewaydSetupWizard">
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <link rel="stylesheet" href="/wizard/css/styles.css"/>
+    <link rel="stylesheet" href="/wizard/bootstrap/css/bootstrap.min.css"/>
+    <link href="/wizard/styles/theme-style.min.css" rel="stylesheet">
     <title>Wizard</title>
 </head>
-<body>
-<p>Wizard interface goes here.</p>
+<body class="page page-index" ng-controller="SetupCtrl">
+<div id="content" ng-view=""></div>
+<script src="/wizard/angular/angular/angular.min.js"></script>
+<script src="/wizard/angular/angular-route/angular-route.min.js"></script>
+<script src="/wizard/bootstrap/js/jquery.min.js"></script>
+<script src="/wizard/bootstrap/js/bootstrap.min.js"></script>
+
+<script src="/wizard/js/app.js"></script>
+<script src="/wizard/js/services/api.js"></script>
+<script src="/wizard/js/controllers/setup_controller.js"></script>
+
 </body>
 </html>
