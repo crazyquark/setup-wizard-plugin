@@ -8,7 +8,6 @@ var RippleRestClient = require('ripple-rest-client');
 function Wizard (options) {
   this.gatewayd = options.gatewayd;
 
-  this.errors = [];
   this.setupConfig = {};
 
 }
@@ -22,13 +21,18 @@ function Wizard (options) {
 
 
 Wizard.prototype.setup = function(config, callback) {
-  // do the wizard dance
-
+  var _this = this;
+  _this.validateInput(config, function(error, configResults){
+    if (error) {
+      return callback(error);
+    }
+    callback(null, configResults);
+  });
 
 }
 
 Wizard.prototype.validateInput = function(config, callback) {
-  var errors = this.errors;
+  var errors = [];
   var self = this;
 
   if (!config.currencies) {
@@ -64,7 +68,7 @@ Wizard.prototype.validateInput = function(config, callback) {
   }
 
   if(errors.length > 0){
-    callback(errors, null);
+    callback(errors);
   } else {
     callback(null, config);
   }
