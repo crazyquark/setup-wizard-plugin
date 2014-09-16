@@ -20,6 +20,7 @@ WizardController.prototype = {
   setup: function(request, response) {
     var _this = this;
     var options = request.body;
+    console.log(request.body);
 
     _this.wizard.setup(options, function(error, setup){
       if (error) {
@@ -27,8 +28,8 @@ WizardController.prototype = {
           .status(500)
           .send({
             success: false,
-            error: error
-        })
+            message: error
+        });
       }
 
       response
