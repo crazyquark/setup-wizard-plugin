@@ -1,4 +1,4 @@
-gatewaydSetupWizard.controller('SetupCtrl', ['$scope', 'ApiService', function($scope, $api) {
+gatewaydSetupWizard.controller('SetupCtrl', ['$scope', '$rootScope', '$location', 'ApiService', function($scope, $rootScope, $location, $api) {
   $scope.errors = [];
 
   $scope.config = {
@@ -6,16 +6,27 @@ gatewaydSetupWizard.controller('SetupCtrl', ['$scope', 'ApiService', function($s
   };
   
   $scope.config_results = {};
-  
+  $scope.isSubmitting = false;
+
   $scope.setup = function() {
     $scope.errors = [];
-    $scope.config.currencies[$scope.config.currency] = $scope.config.amount;
+    $rootScope.setupResults = {};
 
+    $scope.config.currencies[$scope.config.currency] = $scope.config.amount;
+    $scope.isSubmitting = !$scope.isSubmitting;
     $api.setup($scope.config, function(error, response){
+      $scope.isSubmitting = !$scope.isSubmitting;
+
       if (error) {
         return $scope.errors = error.message;
       }
-      $scope.config_results = response;
+
+      if (response.success) {
+        $rootScope.setupResults = response.setup;
+        $location.path('/summary');
+      }
+
     });
-  }
+  };
+
 }]);
