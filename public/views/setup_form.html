@@ -3,24 +3,19 @@
         <h3 class="title-divider"><span>Gatewayd Setup Wizard</span></h3>
 
         <div class="form-group">
-            <input type="text" class="form-control" ng-model="config.ripple_address" placeholder="Ripple Address" required />
+            <input type="text" class="form-control" name="ripple_address" ng-model="config.ripple_address" placeholder="Ripple Address" required />
         </div>
 
         <div class="form-group">
-            <input type="text" class="form-control" ng-model="config.secret" placeholder="Ripple Secret" required />
+            <input type="text" class="form-control" ng-model="config.cold_wallet_secret" placeholder="Ripple Secret" required />
         </div>
 
         <div class="form-group">
             <input type="text" class="form-control" ng-model="config.currency" placeholder="Currency to issue" required />
         </div>
 
-
         <div class="form-group">
-            <input type="text" class="form-control" placeholder="" required />
-        </div>
-
-        <div class="form-group">
-            <input type="text" class="form-control" placeholder="" required />
+            <input type="text" class="form-control" ng-model="config.amount" placeholder="Amount" required />
         </div>
 
         <div class="form-group">
