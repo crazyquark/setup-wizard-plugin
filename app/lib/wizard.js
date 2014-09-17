@@ -59,7 +59,7 @@ Wizard.prototype.setup = function(config, callback) {
       _this._finalizeSetup(config, next);
     }
   ], callback);
-}
+};
 
 Wizard.prototype.validateInput = function(config, callback) {
   var errors = [];
@@ -125,7 +125,7 @@ Wizard.prototype._setColdWallet = function(config, callback){
  */
 
 Wizard.prototype._setHotWallet = function(config, callback){
-  console.log('callback', callback);
+  
   var self = this;
   self.gatewayd.api.generateWallet(function(error, wallet){
     if(error){
@@ -179,7 +179,8 @@ Wizard.prototype._fundHotWallet = function (config, callback){
 
 Wizard.prototype._setLastPaymentHash = function(config, callback){
   var self = this;
-  self.gatewayd.api.setLastPaymentHash(config, function(error, response){
+
+  self.gatewayd.api.setLastPaymentHash(self.setupConfig, function(error, response){
     if(error){
       callback(error);
     } else {
@@ -298,7 +299,7 @@ Wizard.prototype._issueCurrency = function(config, callback){
   };
 
   for (var currency in config.currencies) {
-    opts.amount = config.currencies[currency];
+    opts.amount = Number(config.currencies[currency]);
     opts.currency = currency;
   }
 
@@ -393,6 +394,7 @@ Wizard.prototype._finalizeSetup = function(config, callback) {
     callback(new Error('configurations failed'))
   } else {
     callback(null, self.setupConfig);
+    self.setupConfig = {};
   }
 }
 /**
