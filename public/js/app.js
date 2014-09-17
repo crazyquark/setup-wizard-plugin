@@ -9,6 +9,10 @@ gatewaydSetupWizard.config(['$routeProvider',
         controller: 'SetupCtrl',
         templateUrl: 'views/setup_form.html'
       }).
+      when('/summary', {
+        controller: 'SetupCtrl',
+        templateUrl: 'views/summary.html'
+      }).
       otherwise({
         redirectTo: '/setup'
       });
