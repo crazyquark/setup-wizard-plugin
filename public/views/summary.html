@@ -1,0 +1,26 @@
+<div class="container" ng-show="setupResults.cold_wallet">
+    <div class="panel panel-default">
+        <div class="panel-heading">Summary</div>
+        <div class="panel-body">
+            <p>Your gatewayd application is ready to go! <a href="/#/login">Login</a> to the gatewayd admin using the following credentials. To further customized your software, you can find
+                <a href="">documentation</a> on <a href="https://github.com/ripple/gatewayd">github.</a></p>
+        </div>
+            <ul class="list-group">
+                <li class="list-group-item">Username: {{setupResults.admin_login.username}}</li>
+                <li class="list-group-item">Password: {{setupResults.admin_login.password}}</li>
+                <li class="list-group-item">Hot wallet address: {{setupResults.hot_wallet.address}}</li>
+                <li class="list-group-item">Hot wallet secret: {{setupResults.hot_wallet.secret}}</li>
+                <li class="list-group-item">Hot wallet secret: {{setupResults.cold_wallet_balance.value}} XRP</li>
+                <li class="list-group-item">Currencies:
+                    <ul>
+                        <li ng-repeat="currency in setupResults.trust_lines">{{ currency.amount }} {{ currency.currency}}</li>
+                    </ul>
+                </li>
+
+            </ul>
+    </div>
+</div>
+<!--if gatwayd is not setup-->
+<div class="container" ng-hide="setupResults.cold_wallet">
+    <p>Gatewayd is has not been configured, you can do so by visiting the <a href="/wizard">wizard form.</a></p>
+</div>
