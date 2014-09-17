@@ -1,26 +1,30 @@
 <div class="container" >
     <form name="setupWizardForm" class="form-login form-wrapper form-narrow" ng-submit="setup()" novalidate>
         <h3 class="title-divider"><span>Gatewayd Setup Wizard</span></h3>
+        <fieldset ng-disabled="isSubmitting">
+            <div class="form-group">
+                <input type="text" class="form-control" name="ripple_address" ng-model="config.ripple_address" placeholder="Ripple Address" required />
+            </div>
 
-        <div class="form-group">
-            <input type="text" class="form-control" name="ripple_address" ng-model="config.ripple_address" placeholder="Ripple Address" required />
-        </div>
+            <div class="form-group">
+                <input type="text" class="form-control" ng-model="config.cold_wallet_secret" placeholder="Ripple Secret" required />
+            </div>
 
-        <div class="form-group">
-            <input type="text" class="form-control" ng-model="config.cold_wallet_secret" placeholder="Ripple Secret" required />
-        </div>
+            <div class="form-group">
+                <input type="text" class="form-control" ng-model="config.currency" placeholder="Currency to issue" required />
+            </div>
 
-        <div class="form-group">
-            <input type="text" class="form-control" ng-model="config.currency" placeholder="Currency to issue" required />
-        </div>
+            <div class="form-group">
+                <input type="text" class="form-control" ng-model="config.amount" placeholder="Amount" required />
+            </div>
 
-        <div class="form-group">
-            <input type="text" class="form-control" ng-model="config.amount" placeholder="Amount" required />
-        </div>
-
-        <div class="form-group">
-            <button class="btn btn-primary" ng-disabled="setupWizardForm.$invalid" style="width: 100%">Setup</button>
-        </div>
+            <div class="form-group">
+                <button class="btn btn-primary" ng-disabled="setupWizardForm.$invalid" style="width: 100%">
+                    <span ng-show="isSubmitting">Setting up Gatewayd</span>
+                    <span ng-hide="isSubmitting">Setup</span>
+                </button>
+            </div>
+        </fieldset>
         <p class="small">Your secret won't be store anywhere; will be used once to configure gatewayd.</p>
     </form>
 
