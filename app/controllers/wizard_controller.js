@@ -20,7 +20,7 @@ WizardController.prototype = {
   setup: function(request, response) {
     var _this = this;
     var options = request.body;
-    
+
     _this.wizard.setup(options, function(error, setup){
       if (error) {
         return response
