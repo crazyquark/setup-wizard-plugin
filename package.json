@@ -1,5 +1,5 @@
 {
-  "name": "gatewayd-setup-wizard",
+  "name": "gatewayd-setup-wizard-plugin",
   "version": "1.0.0",
   "dependencies": {
     "body-parser": "^1.6.5",
