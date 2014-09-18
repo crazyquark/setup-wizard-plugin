@@ -6,13 +6,11 @@ COLD_WALLET_SECRET = process.env.RIPPLE_ACCOUNT_SECRET;
 
 describe('Wizard setup', function(){
 
-
   var wizardPligin;
-  before(function(done){
+  before(function(){
     wizardPligin = new WizardPlugin({
       gatewayd: gatewayd
     });
-    done();
   });
 
   it('should set ripple rest url', function(done) {
