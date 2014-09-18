@@ -13,7 +13,7 @@ WizardController.prototype = {
       plugin: {
         name: 'gatewayd-setup-plugin',
         version: '0.1.0',
-        documentation: 'https://github.com/gatewayd/setup-wizard-plugin'
+        documentation: 'https://github.com/gatewayd/gatewayd-setup-wizard-plugin'
       }
     });
   },
