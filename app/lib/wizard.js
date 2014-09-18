@@ -26,6 +26,9 @@ Wizard.prototype.setup = function(config, callback) {
       _this.validateInput(config, next)
     },
     function(config, next) {
+      _this._verifyRippleRestConnection(config, next);
+    },
+    function(config, next) {
       _this._setColdWallet(config, next);
     },
     function(config, next) {
@@ -38,10 +41,10 @@ Wizard.prototype.setup = function(config, callback) {
       _this._fundHotWallet(config, next);
     },
     function(config, next) {
-      _this._setTrustLine(config, next);
+      _this._addCurrency(config, next);
     },
     function(config, next) {
-      _this._addCurrency(config, next);
+      _this._setTrustLine(config, next);
     },
     function(config, next) {
       _this._issueCurrency(config, next);
@@ -63,7 +66,7 @@ Wizard.prototype.setup = function(config, callback) {
 
 Wizard.prototype.validateInput = function(config, callback) {
   var errors = [];
-  var self = this;
+  var _this = this;
 
   if (!config.currencies) {
     errors.push({ field: 'currencies', message: 'please provide currencies' });
@@ -71,7 +74,7 @@ Wizard.prototype.validateInput = function(config, callback) {
     var allCurrenciesAreValid = true;
 
     for (var currency in config.currencies){
-      if(!self.gatewayd.validator.isNumeric(config.currencies[currency])){
+      if(!_this.gatewayd.validator.isNumeric(config.currencies[currency])){
         allCurrenciesAreValid = false;
       }
     }
@@ -81,7 +84,7 @@ Wizard.prototype.validateInput = function(config, callback) {
     }
   }
 
-  if (!self.gatewayd.validator.isRippleAddress(config.ripple_address)) {
+  if (!_this.gatewayd.validator.isRippleAddress(config.ripple_address)) {
     errors.push({ field: 'ripple_address', message: 'please provide a valid ripple_address' });
   }
 
@@ -106,12 +109,12 @@ Wizard.prototype.validateInput = function(config, callback) {
  * @private
  */
 Wizard.prototype._setColdWallet = function(config, callback){
-  var self = this;
+  var _this = this;
   this.gatewayd.api.setColdWallet(config.ripple_address, function(error, address){
     if(error){
       callback(error);
     } else {
-      self.setupConfig.cold_wallet = address;
+      _this.setupConfig.cold_wallet = address;
       callback(null, config);
     }
   });
@@ -126,16 +129,16 @@ Wizard.prototype._setColdWallet = function(config, callback){
 
 Wizard.prototype._setHotWallet = function(config, callback){
   
-  var self = this;
-  self.gatewayd.api.generateWallet(function(error, wallet){
+  var _this = this;
+  _this.gatewayd.api.generateWallet(function(error, wallet){
     if(error){
       callback(error);
     } else {
-      self.gatewayd.api.setHotWallet(wallet.address, wallet.secret, function(error, hotWallet){
+      _this.gatewayd.api.setHotWallet(wallet.address, wallet.secret, function(error, hotWallet){
         if(error){
           callback(error);
         } else {
-          self.setupConfig.hot_wallet = hotWallet;
+          _this.setupConfig.hot_wallet = hotWallet;
           callback(null, config);
         }
       });
@@ -152,7 +155,7 @@ Wizard.prototype._setHotWallet = function(config, callback){
  * @private
  */
 Wizard.prototype._fundHotWallet = function (config, callback){
-  var self = this;
+  var _this = this;
   var opts = {
     amount: 60,
     currency: 'XRP',
@@ -160,11 +163,11 @@ Wizard.prototype._fundHotWallet = function (config, callback){
     destination_tag: 0
   };
 
-  self.gatewayd.api.fundHotWallet(opts, function(error, payment){
+  _this.gatewayd.api.fundHotWallet(opts, function(error, payment){
     if(error){
       callback(error);
     } else {
-      self.setupConfig.hash = payment.hash;
+      _this.setupConfig.hash = payment.hash;
       callback(null, config);
     }
   });
@@ -178,28 +181,28 @@ Wizard.prototype._fundHotWallet = function (config, callback){
  */
 
 Wizard.prototype._setLastPaymentHash = function(config, callback){
-  var self = this;
+  var _this = this;
 
-  self.gatewayd.api.setLastPaymentHash(self.setupConfig, function(error, response){
+  _this.gatewayd.api.setLastPaymentHash(_this.setupConfig, function(error, response){
     if(error){
       callback(error);
     } else {
-      self.setupConfig.hash = response;
-      callback(null, self.setupConfig);
+      _this.setupConfig.hash = response;
+      callback(null, _this.setupConfig);
     }
   });
 
 };
 
 Wizard.prototype._updateAccountSettings = function (config, callback) {
-  var self = this;
+  var _this = this;
 
   var rippleRestClient = new RippleRestClient({
-    account: self.gatewayd.config.get('COLD_WALLET')
+    account: _this.gatewayd.config.get('COLD_WALLET')
   });
 
   var optsColdWallet = {
-    account: self.gatewayd.config.get('COLD_WALLET'),
+    account: _this.gatewayd.config.get('COLD_WALLET'),
     data: {
       secret: config.cold_wallet_secret,
       settings: {
@@ -210,9 +213,9 @@ Wizard.prototype._updateAccountSettings = function (config, callback) {
   };
 
   var optsHotWallet = {
-    account: self.gatewayd.config.get('HOT_WALLET').address,
+    account: _this.gatewayd.config.get('HOT_WALLET').address,
     data: {
-      secret: self.gatewayd.config.get('HOT_WALLET').secret,
+      secret: _this.gatewayd.config.get('HOT_WALLET').secret,
       settings: {
         disallow_xrp: true,
         require_destination_tag: true
@@ -227,7 +230,7 @@ Wizard.prototype._updateAccountSettings = function (config, callback) {
         if(error || !response.success){
           next({ field: 'ripple_address', message: 'cannot update cold wallet account settings' }, null);
         } else {
-          self.setupConfig.cold_wallet_settings = response.settings;
+          _this.setupConfig.cold_wallet_settings = response.settings;
           next(null, config);
         }
       });
@@ -239,7 +242,7 @@ Wizard.prototype._updateAccountSettings = function (config, callback) {
           next({ field: 'ripple_address', message: 'cannot update hot wallet account settings' }, null);
         } else {
 
-          self.setupConfig.hot_wallet_settings = response.settings;
+          _this.setupConfig.hot_wallet_settings = response.settings;
           next(null, config);
         }
       });
@@ -261,15 +264,15 @@ Wizard.prototype._updateAccountSettings = function (config, callback) {
  * @private
  */
 Wizard.prototype._setTrustLine = function(config, callback){
-  var self = this;
+  var _this = this;
   for (var currency in config.currencies) {
 
-    self.gatewayd.api.setTrustLine(currency, config.currencies[currency], function(error, response){
+    _this.gatewayd.api.setTrustLine(currency, config.currencies[currency], function(error, response){
       if(error){
         callback(error);
       } else {
-        self.setupConfig.trust_lines = [];
-        self.setupConfig.trust_lines.push({ currency: response.currency, amount: response.limit});
+        _this.setupConfig.trust_lines = [];
+        _this.setupConfig.trust_lines.push({ currency: response.currency, amount: response.limit});
         callback(null, config);
       }
     });
@@ -277,13 +280,13 @@ Wizard.prototype._setTrustLine = function(config, callback){
 };
 
 Wizard.prototype._addCurrency = function(config, callback){
-  var self = this;
+  var _this = this;
   for (var currency in config.currencies) {
-    self.gatewayd.api.addCurrency(currency, config.currencies[currency], function (error, response) {
+    _this.gatewayd.api.addCurrency(currency, config.currencies[currency], function (error, response) {
       if (error) {
         callback(error);
       } else {
-        self.setupConfig.currencies = response;
+        _this.setupConfig.currencies = response;
         callback(null, config);
       }
     });
@@ -291,7 +294,7 @@ Wizard.prototype._addCurrency = function(config, callback){
 };
 
 Wizard.prototype._issueCurrency = function(config, callback){
-  var self = this;
+  var _this = this;
 
   var opts = {
     secret: config.cold_wallet_secret,
@@ -299,55 +302,55 @@ Wizard.prototype._issueCurrency = function(config, callback){
   };
 
   for (var currency in config.currencies) {
-    opts.amount = Number(config.currencies[currency]);
+    opts.amount = config.currencies[currency];
     opts.currency = currency;
   }
 
-  self.gatewayd.api.issueCurrency(opts.amount, opts.currency, opts.secret, function (error, response) {
+  _this.gatewayd.api.issueCurrency(opts.amount, opts.currency, opts.secret, function (error, response) {
     if (error) {
       callback(error);
     } else {
 
-      self.setupConfig.currencies_issued = response;
+      _this.setupConfig.currencies_issued = response;
       callback(null, config);
     }
   });
 };
 
 Wizard.prototype._setRippleRestUrl = function(config, callback){
-  var self = this;
-  self.gatewayd.api.setRippleRestUrl(config, function(error, response){
+  var _this = this;
+  _this.gatewayd.api.setRippleRestUrl(config, function(error, response){
     if(error){
       callback(error);
     } else {
-      self.setupConfig.ripple_rest_url = response;
-      callback(null, self.setupConfig);
+      _this.setupConfig.ripple_rest_url = response;
+      callback(null, _this.setupConfig);
     }
   });
 };
 
 Wizard.prototype._setDatabaseUrl = function(config, callback){
-  var self = this;
-  self.gatewayd.config.set('DATABASE_URL', config.database_url);
-  self.gatewayd.config.save(function(error, response){
+  var _this = this;
+  _this.gatewayd.config.set('DATABASE_URL', config.database_url);
+  _this.gatewayd.config.save(function(error, response){
 
     if(error){
       callback(error);
     } else {
-      self.setupConfig.database_url = self.gatewayd.config.get('DATABASE_URL');
-      callback(null, self.setupConfig);
+      _this.setupConfig.database_url = _this.gatewayd.config.get('DATABASE_URL');
+      callback(null, _this.setupConfig);
     }
   });
 };
 
 Wizard.prototype._setKey = function(config, callback){
-  var self = this;
-  self.gatewayd.api.setKey(function(error, key){
+  var _this = this;
+  _this.gatewayd.api.setKey(function(error, key){
     if(error){
       callback(error);
     } else {
-      self.setupConfig.admin_login = {
-        username: 'admin@' + self.gatewayd.config.get('DOMAIN'),
+      _this.setupConfig.admin_login = {
+        username: 'admin@' + _this.gatewayd.config.get('DOMAIN'),
         password: key
       };
 
@@ -377,11 +380,14 @@ Wizard.prototype._verifyPostgresConnection = function(config, callback) {
  * @param callback
  * @private
  */
-Wizard.prototype._verifyRippleRestConnection = function(rippleRestUrl, callback){
+Wizard.prototype._verifyRippleRestConnection = function(config, callback){
+  var rippleRestClient = new RippleRestClient({
+    account: config.ripple_address
+  });
 
-  this.client.ping(function(error, body){
+  rippleRestClient.ping(function(error, body){
     if(error || !body.success) {
-      callback({ field: 'ripple_rest', message: 'ripple rest is not running' }, null);
+      callback({ field: 'ripple_rest', message: 'ripple rest is not running' });
     } else {
       callback(null, body.success);
     }
@@ -389,12 +395,12 @@ Wizard.prototype._verifyRippleRestConnection = function(rippleRestUrl, callback)
 };
 
 Wizard.prototype._finalizeSetup = function(config, callback) {
-  var self = this;
+  var _this = this;
   if (!config) {
     callback(new Error('configurations failed'))
   } else {
-    callback(null, self.setupConfig);
-    self.setupConfig = {};
+    callback(null, _this.setupConfig);
+    _this.setupConfig = {};
   }
 }
 /**
@@ -406,9 +412,9 @@ Wizard.prototype._finalizeSetup = function(config, callback) {
  */
 
 Wizard.prototype._checkAccountBalance = function(config, callback){
-  var self = this;
+  var _this = this;
   var rippleRestClient = new RippleRestClient({
-    account: self.gatewayd.config.get('COLD_WALLET')
+    account: _this.gatewayd.config.get('COLD_WALLET')
   });
 
   rippleRestClient.getAccountBalance(function(error, balance){
@@ -419,10 +425,15 @@ Wizard.prototype._checkAccountBalance = function(config, callback){
     } else if (Number(balance.balances[0].value) < 100) {
       callback({ field: 'ripple_address', message: 'account balance must be at least 100 XRP'}, null);
     } else {
-      self.setupConfig.cold_wallet_balance = balance.balances[0];
+      _this.setupConfig.cold_wallet_balance = balance.balances[0];
       callback(null, config);
     }
   });
 };
+
+Wizard.prototype._verifyConfiguration = function(callback) {
+  var _this = this;
+
+}
 
 module.exports = Wizard;
