@@ -382,6 +382,7 @@ Wizard.prototype._verifyPostgresConnection = function(config, callback) {
  */
 Wizard.prototype._verifyRippleRestConnection = function(config, callback){
   var rippleRestClient = new RippleRestClient({
+    api: 'http://localhost:5990/v1',
     account: config.ripple_address
   });
 
