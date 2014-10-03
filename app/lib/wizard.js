@@ -1,15 +1,19 @@
 var async = require('async');
 var RippleRestClient = require('ripple-rest-client');
+var request = require('superagent');
+var Promise = require('bluebird');
 /**
  * @description Wizard class that handles the entire process
  * @class Wizard
  * @constructor
  */
 function Wizard (options) {
+  var _this = this;
   this.gatewayd = options.gatewayd;
-  
   this.setupConfig = {};
 }
+
+
 
 /**
  * @description Validates each input's data.
@@ -64,40 +68,41 @@ Wizard.prototype.setup = function(config, callback) {
   ], callback);
 };
 
-Wizard.prototype.validateInput = function(config, callback) {
-  var errors = [];
+Wizard.prototype._validateInput = function(config, callback) {
+
   var _this = this;
 
-  if (!config.currencies) {
-    errors.push({ field: 'currencies', message: 'please provide currencies' });
-  } else {
-    var allCurrenciesAreValid = true;
+  return new Promise(function(resolve, reject){
+    if (!config.ripple_address) {
+      return reject(new Error('NoRippleAddressError'));
+    }
 
-    for (var currency in config.currencies){
-      if(!_this.gatewayd.validator.isNumeric(config.currencies[currency])){
-        allCurrenciesAreValid = false;
+    if (!_this.gatewayd.validator.isRippleAddress(config.ripple_address)) {
+      return reject(new Error('InvalidRippleAddressError'));
+    }
+
+    if(!config.cold_wallet_secret) {
+      return reject(new Error('RippleSecretError'));
+    }
+
+    if (!config.currencies) {
+      return reject(new Error('MissingCurrencyError'));
+    } else {
+      var allCurrenciesAreValid = true;
+
+      for (var currency in config.currencies){
+        if(!_this.gatewayd.validator.isNumeric(config.currencies[currency])){
+          allCurrenciesAreValid = false;
+        }
+      }
+
+      if (!allCurrenciesAreValid) {
+        return reject(new Error('InvalidCurrencyAmountError'));
       }
     }
 
-    if (!allCurrenciesAreValid) {
-      errors.push({ field: 'currency_limit', message: 'please provide a valid currency limit amount' });
-    }
-  }
-
-  if (!_this.gatewayd.validator.isRippleAddress(config.ripple_address)) {
-    errors.push({ field: 'ripple_address', message: 'please provide a valid ripple_address' });
-  }
-
-
-  if(!config.cold_wallet_secret) {
-    errors.push({ field: 'cold_wallet_secret', message: 'please provide a valid cold_wallet_secret. It will not be stored to disk!' });
-  }
-
-  if(errors.length > 0){
-    callback(errors);
-  } else {
-    callback(null, config);
-  }
+    resolve(config);
+  });
 
 };
 
@@ -110,14 +115,16 @@ Wizard.prototype.validateInput = function(config, callback) {
  */
 Wizard.prototype._setColdWallet = function(config, callback){
   var _this = this;
-  this.gatewayd.api.setColdWallet(config.ripple_address, function(error, address){
-    if(error){
-      callback(error);
-    } else {
-      _this.setupConfig.cold_wallet = address;
-      callback(null, config);
-    }
-  });
+
+  return new Promise(function(resolve, reject){
+    _this.gatewayd.config.set('COLD_WALLET', config.ripple_address);
+    _this.gatewayd.config.save(function(error){
+      if (error) {
+        return reject(new Error('SetColdWalletSaveError'));
+      }
+        resolve({ cold_wallet: _this.gatewayd.config.get('COLD_WALLET') });
+      });
+    });
 };
 
 /**
@@ -127,23 +134,25 @@ Wizard.prototype._setColdWallet = function(config, callback){
  * @private
  */
 
-Wizard.prototype._setHotWallet = function(config, callback){
-  
+Wizard.prototype._setHotWallet = function(){
+
   var _this = this;
-  _this.gatewayd.api.generateWallet(function(error, wallet){
-    if(error){
-      callback(error);
-    } else {
-      _this.gatewayd.api.setHotWallet(wallet.address, wallet.secret, function(error, hotWallet){
-        if(error){
-          callback(error);
-        } else {
-          _this.setupConfig.hot_wallet = hotWallet;
-          callback(null, config);
+  return new Promise(function(resolve, reject){
+    _this.gatewayd.api.generateWallet(function(error, wallet){
+      if (error) {
+        return reject(new Error('RippleWalletGenerateError'));
+      }
+      _this.gatewayd.api.setHotWallet(wallet.address, wallet.secret, function(error, response){
+        if (error) {
+          return reject(new Error('SetHotWalletError'));
         }
+        resolve({ hot_wallet: response });
       });
-    }
+
+    });
+
   });
+
 };
 
 /**
@@ -360,17 +369,20 @@ Wizard.prototype._setKey = function(config, callback){
 };
 
 Wizard.prototype._verifyPostgresConnection = function(config, callback) {
+  var _this = this;
+  return new Promise(function(resolve, reject){
+    _this.gatewayd.database
+      .authenticate()
+      .complete(function(error){
+        if(error){
+          reject(new Error('DatabaseConnectionError'));
+        } else {
+          resolve(true);
+        }
 
-  this.gatewayd.data.db
-    .authenticate()
-    .complete(function(error){
-      if(error){
-        callback({ field: 'database_url', message: 'database is not connected' }, null);
-      } else {
-        callback(null, config);
-      }
+      });
+  });
 
-    });
 };
 
 /**
@@ -380,18 +392,16 @@ Wizard.prototype._verifyPostgresConnection = function(config, callback) {
  * @param callback
  * @private
  */
-Wizard.prototype._verifyRippleRestConnection = function(config, callback){
-  var rippleRestClient = new RippleRestClient({
-    api: 'http://localhost:5990/v1',
-    account: config.ripple_address
-  });
+Wizard.prototype._verifyRippleRestConnection = function(){
 
-  rippleRestClient.ping(function(error, body){
-    if(error || !body.success) {
-      callback({ field: 'ripple_rest', message: 'ripple rest is not running' });
-    } else {
-      callback(null, body.success);
-    }
+  return new Promise(function(resolve, reject){
+    request.get('http://localhost:5990/v1')
+      .end(function(error, response){
+        if (error) {
+          return reject(new Error('RippleRESTConnectionError'));
+        }
+        resolve(response.body);
+      });
   });
 };
 

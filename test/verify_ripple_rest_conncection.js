@@ -9,13 +9,28 @@ describe('Check for Ripple-REST connection', function(){
   });
 
   it('should ping ripple rest to verify connection -- /v1', function(done){
-    wizard._verifyRippleRestConnection({
-        ripple_address: 'rLtys1YJHGj8oTpECWSzDv77YRGDWGduUX'
-      }, function(error, response) {
+    wizard._verifyRippleRestConnection()
+      .then(function(ripple_rest_status){
+        assert.strictEqual(ripple_rest_status.success, true);
+        done();
+      })
+      .error(function(error){
         assert(!error);
-        assert.strictEqual(response, true);
         done();
       });
   });
+
+  it('should return error on no ripple rest connection', function(done){
+    wizard._verifyRippleRestConnection()
+      .then(function(ripple_rest_status){
+        assert.strictEqual(ripple_rest_status.success, true);
+        done();
+      })
+      .error(function(error){
+        assert(!error);
+        done();
+      });
+
+  })
 
 });
