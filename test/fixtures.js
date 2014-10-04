@@ -36,11 +36,11 @@ module.exports = {
   },
   invalid_input_no_currency: {
     ripple_address: 'rMinhWxZz4jeHoJGyddtmwg6dWhyqQKtJz',
-    cold_wallet_secret: 'sdfsadf'
+    cold_wallet_secret: process.env.RIPPLE_ACCOUNT_SECRET,
   },
   invalid_input_currency: {
     ripple_address: 'rMinhWxZz4jeHoJGyddtmwg6dWhyqQKtJz',
-    cold_wallet_secret: 'sdfsadf',
+    cold_wallet_secret: process.env.RIPPLE_ACCOUNT_SECRET,
     currencies: {
       'POP': 'asdfasdf'
     }

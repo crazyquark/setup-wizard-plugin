@@ -9,14 +9,17 @@ describe('Set hot wallet', function(){
     gatewayd: gatewayd
   });
 
+  var hot_wallet;
+
   it('should set hot wallet -- pass', function(done){
     wizard._setHotWallet()
       .then(function(wallet){
+        hot_wallet = wallet.hot_wallet;
         assert(typeof wallet, 'object');
         assert(wallet.hasOwnProperty('hot_wallet'));
         assert(wallet.hot_wallet.hasOwnProperty('address'));
         assert(wallet.hot_wallet.hasOwnProperty('secret'));
-        console.log('wallet', wallet);
+        assert(wallet.hot_wallet.hasOwnProperty('id'));
         done();
       })
       .error(function(error){
@@ -24,6 +27,13 @@ describe('Set hot wallet', function(){
         done();
       });
 
+  });
+
+  after(function(done){
+    wizard.gatewayd.models.rippleAddresses.find({ where: { id: hot_wallet.id }})
+      .success(function(hot_wallet){
+        hot_wallet.destroy().success(done);
+      });
   });
 
 });

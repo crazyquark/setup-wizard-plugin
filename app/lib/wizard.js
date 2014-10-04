@@ -27,7 +27,7 @@ Wizard.prototype.setup = function(config, callback) {
   var _this = this;
   async.waterfall([
     function(next) {
-      _this.validateInput(config, next)
+      _this._validateInput(config, next)
     },
     function(config, next) {
       _this._verifyRippleRestConnection(config, next);
