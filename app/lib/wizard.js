@@ -1,7 +1,8 @@
 var async = require('async');
 var RippleRestClient = require('ripple-rest-client');
-var request = require('superagent');
+var http = require('superagent');
 var Promise = require('bluebird');
+
 /**
  * @description Wizard class that handles the entire process
  * @class Wizard
@@ -10,7 +11,6 @@ var Promise = require('bluebird');
 function Wizard (options) {
   var _this = this;
   this.gatewayd = options.gatewayd;
-  this.setupConfig = {};
 }
 
 
@@ -203,64 +203,53 @@ Wizard.prototype._setLastPaymentHash = function(config, callback){
 
 };
 
-Wizard.prototype._updateAccountSettings = function (config, callback) {
+Wizard.prototype._updateAccountSettings = function (config) {
   var _this = this;
+  var accounts;
 
   var rippleRestClient = new RippleRestClient({
     account: _this.gatewayd.config.get('COLD_WALLET')
   });
 
-  var optsColdWallet = {
+  accounts = [{
     account: _this.gatewayd.config.get('COLD_WALLET'),
     data: {
       secret: config.cold_wallet_secret,
       settings: {
-        disallow_xrp: true,
-        require_destination_tag: true
-      }
-    }
-  };
-
-  var optsHotWallet = {
-    account: _this.gatewayd.config.get('HOT_WALLET').address,
-    data: {
-      secret: _this.gatewayd.config.get('HOT_WALLET').secret,
-      settings: {
-        disallow_xrp: true,
-        require_destination_tag: true
-      }
-    }
-  };
-
-  async.series([
-    function(next) {
-
-      rippleRestClient.updateAccountSettings(optsColdWallet, function(error, response){
-        if(error || !response.success){
-          next({ field: 'ripple_address', message: 'cannot update cold wallet account settings' }, null);
-        } else {
-          _this.setupConfig.cold_wallet_settings = response.settings;
-          next(null, config);
+          disallow_xrp: true,
+          require_destination_tag: true
         }
-      });
+      }
     },
-    function(next) {
+    {
+      account: _this.gatewayd.config.get('HOT_WALLET').address,
+      data: {
+        secret: _this.gatewayd.config.get('HOT_WALLET').secret,
+        settings: {
+          disallow_xrp: true,
+          require_destination_tag: true
+        }
+      }
+    }];
 
-      rippleRestClient.updateAccountSettings(optsHotWallet, function(error, response){
+  function updateSettings(account) {
+    return new Promise(function(resolve, reject){
+      rippleRestClient.updateAccountSettings(account, function(error, response){
         if(error || !response.success){
-          next({ field: 'ripple_address', message: 'cannot update hot wallet account settings' }, null);
+          return reject(new Error('AccountUpdateSettingsError'));
         } else {
-
-          _this.setupConfig.hot_wallet_settings = response.settings;
-          next(null, config);
+          resolve(response);
         }
       });
-    }
-  ], function(error, response){
-    if (error) {
-      return callback(error);
-    }
-    callback(null, config);
+    });
+  }
+
+  return new Promise(function(resolve, reject){
+    Promise.all([updateSettings(accounts[0]), updateSettings(accounts[1])])
+      .then(function(settings){
+        resolve({ account_settings: settings });
+      })
+      .error(reject);
   });
 
 };
@@ -274,18 +263,19 @@ Wizard.prototype._updateAccountSettings = function (config, callback) {
  */
 Wizard.prototype._setTrustLine = function(config, callback){
   var _this = this;
-  for (var currency in config.currencies) {
-
-    _this.gatewayd.api.setTrustLine(currency, config.currencies[currency], function(error, response){
-      if(error){
-        callback(error);
-      } else {
-        _this.setupConfig.trust_lines = [];
-        _this.setupConfig.trust_lines.push({ currency: response.currency, amount: response.limit});
-        callback(null, config);
-      }
-    });
-  }
+  var trust_lines = [];
+  return new Promise(function(resolve, reject){
+    for (var currency in config.currencies) {
+      _this.gatewayd.api.setTrustLine(currency, config.currencies[currency], function(error, response){
+        if(error){
+          return reject(error);
+        } else {
+          trust_lines.push({ currency: response.currency, amount: response.limit});
+        }
+      });
+    }
+    resolve(trust_lines);
+  });
 };
 
 Wizard.prototype._addCurrency = function(config, callback){
@@ -395,7 +385,7 @@ Wizard.prototype._verifyPostgresConnection = function(config, callback) {
 Wizard.prototype._verifyRippleRestConnection = function(){
 
   return new Promise(function(resolve, reject){
-    request.get('http://localhost:5990/v1')
+    http.get('http://localhost:5990/v1')
       .end(function(error, response){
         if (error) {
           return reject(new Error('RippleRESTConnectionError'));
@@ -422,24 +412,28 @@ Wizard.prototype._finalizeSetup = function(config, callback) {
  * @private
  */
 
-Wizard.prototype._checkAccountBalance = function(config, callback){
+Wizard.prototype._checkAccountBalance = function(){
   var _this = this;
-  var rippleRestClient = new RippleRestClient({
-    account: _this.gatewayd.config.get('COLD_WALLET')
+  var get_balance_url = 'http://localhost:5990/v1/accounts/'+_this.gatewayd.config.get('COLD_WALLET')+'/balances';
+  
+  return new Promise(function(resolve, reject){
+    http.get(get_balance_url)
+      .end(function(error, response) {
+        if (error) {
+          return reject(new Error('AccountBalanceError'));
+        }
+
+        var xrpBalance = response.body.balances[0];
+
+        if (xrpBalance && xrpBalance.value < 100) {
+          return reject(new Error('BalanceLowError'));
+        } else {
+          resolve({ cold_wallet_balance: xrpBalance });
+        }
+
+      });
   });
 
-  rippleRestClient.getAccountBalance(function(error, balance){
-    if(error){
-      callback(error);
-    } else if (!balance.success) {
-      callback({ field: 'ripple_address', message: balance.message }, null);
-    } else if (Number(balance.balances[0].value) < 100) {
-      callback({ field: 'ripple_address', message: 'account balance must be at least 100 XRP'}, null);
-    } else {
-      _this.setupConfig.cold_wallet_balance = balance.balances[0];
-      callback(null, config);
-    }
-  });
 };
 
 Wizard.prototype._verifyConfiguration = function(callback) {
