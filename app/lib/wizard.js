@@ -189,6 +189,7 @@ Wizard.prototype._updateAccountSettings = function (config) {
   var accounts;
 
   var rippleRestClient = new RippleRestClient({
+    api: _this.gatewayd.config.get('RIPPLE_REST_API'),
     account: _this.gatewayd.config.get('COLD_WALLET')
   });
 
@@ -350,9 +351,9 @@ Wizard.prototype._verifyPostgresConnection = function() {
  * @private
  */
 Wizard.prototype._verifyRippleRestConnection = function(){
-
+  var _this = this;
   return new Promise(function(resolve, reject){
-    http.get('http://localhost:5990/v1')
+    http.get(_this.gatewayd.config.get('RIPPLE_REST_API')+'v1')
       .end(function(error, response){
         if (error) {
           reject(new Error('RippleRESTConnectionError'));
@@ -379,8 +380,7 @@ Wizard.prototype._finalizeSetup = function(config) {
 
 Wizard.prototype._checkAccountBalance = function(){
   var _this = this;
-  var get_balance_url = 'http://localhost:5990/v1/accounts/'+_this.gatewayd.config.get('COLD_WALLET')+'/balances';
-  var xrpBalance;
+  var get_balance_url = _this.gatewayd.config.get('RIPPLE_REST_API')+'v1/accounts/'+_this.gatewayd.config.get('COLD_WALLET')+'/balances';
 
   return new Promise(function(resolve, reject){
     http.get(get_balance_url)
