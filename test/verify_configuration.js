@@ -10,7 +10,7 @@ describe('Verify gatewayd configuration', function(){
   });
 
   it('should return current configuration', function(done){
-    wizard._verifyConfiguration()
+    wizard.verifyConfiguration()
       .then(function(configuration){
         assert(configuration);
         done();
