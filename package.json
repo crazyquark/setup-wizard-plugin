@@ -1,6 +1,6 @@
 {
   "name": "gatewayd-setup-wizard-plugin",
-  "version": "2.0.35",
+  "version": "2.0.4",
   "dependencies": {
     "body-parser": "^1.6.5",
     "express": "^4.8.4",
