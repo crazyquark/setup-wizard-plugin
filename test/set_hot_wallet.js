@@ -1,6 +1,6 @@
 var assert = require('assert');
 var Wizard = require(__dirname+'/../app/lib/wizard');
-var gatewayd = require('gatewayd');
+var gatewayd = require(__dirname+'/../../../');
 var fixtures = require(__dirname+'/fixtures');
 
 describe('Set hot wallet', function(){

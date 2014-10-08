@@ -1,6 +1,6 @@
 {
   "name": "gatewayd-setup-wizard-plugin",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "dependencies": {
     "body-parser": "^1.6.5",
     "express": "^4.8.4",
@@ -8,7 +8,6 @@
     "ripple-rest-client": "^1.10.2",
     "bluebird": "^2.3.5",
     "superagent": "^0.20.0",
-    "lodash": "^2.4.1",
-    "ripple-gateway": "3.27.0"
+    "lodash": "^2.4.1"
   }
 }

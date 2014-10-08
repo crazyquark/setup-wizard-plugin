@@ -1,6 +1,6 @@
 var assert = require('assert');
 var Wizard = require(__dirname+'/../app/lib/wizard');
-var gatewayd = require('gatewayd');
+var gatewayd = require(__dirname+'/../../../');
 
 describe('Check for Ripple-REST connection', function(){
 
