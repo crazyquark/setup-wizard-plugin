@@ -1,6 +1,6 @@
 var assert = require('assert');
 var Wizard = require(__dirname+'/../app/lib/wizard');
-var gatewayd = require('/Users/abiy/code/gatewayd');
+var gatewayd = require('gatewayd');
 
 describe('Check for Postgres connection', function(){
 
