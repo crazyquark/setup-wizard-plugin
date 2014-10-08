@@ -10,12 +10,6 @@
                 <li class="list-group-item">Password: {{setupResults.admin_login.password}}</li>
                 <li class="list-group-item">Hot wallet address: {{setupResults.hot_wallet.address}}</li>
                 <li class="list-group-item">Hot wallet secret: {{setupResults.hot_wallet.secret}}</li>
-                <li class="list-group-item">Currencies:
-                    <ul>
-                        <li ng-repeat="currency in setupResults.trust_lines">{{ currency.amount }} {{ currency.currency}}</li>
-                    </ul>
-                </li>
-
             </ul>
     </div>
 </div>
