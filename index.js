@@ -10,6 +10,7 @@ function WizardPlugin (options) {
 
   router.get('/wizard/info', wizardController.info.bind(wizardController));
   router.post('/wizard/setup', wizardController.setup.bind(wizardController));
+  router.get('/wizard/verify', wizardController.verify.bind(wizardController));
 
   router.use('/wizard', express.static(__dirname+'/public'));
 

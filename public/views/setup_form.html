@@ -2,12 +2,17 @@
     <form name="setupWizardForm" class="form-login form-wrapper form-narrow" ng-submit="setup()" novalidate>
         <h3 class="title-divider"><span>Gatewayd Setup Wizard</span></h3>
         <fieldset ng-disabled="isSubmitting">
+            <div ng-show="errors.length > 0">
+                <ul ng-repeat="error in errors" class="list-unstyled">
+                    <p>{{ error.message }}</p>
+                </ul>
+            </div>
             <div class="form-group">
                 <input type="text" class="form-control" name="ripple_address" ng-model="config.ripple_address" placeholder="Ripple Address" required />
             </div>
 
             <div class="form-group">
-                <input type="text" class="form-control" ng-model="config.cold_wallet_secret" placeholder="Ripple Secret" required />
+                <input type="password" class="form-control" ng-model="config.cold_wallet_secret" placeholder="Ripple Secret" required />
             </div>
 
             <div class="form-group">
@@ -27,11 +32,5 @@
         </fieldset>
         <p class="small">Your secret won't be store anywhere; will be used once to configure gatewayd.</p>
     </form>
-
-    <div ng-show="errors.length > 0">
-        <ul ng-repeat="error in errors">
-            <li>{{ error.message }}</li>
-        </ul>
-    </div>
 
 </div>

@@ -22,7 +22,11 @@ describe('Update account settings', function(){
         assert(settings.account_settings[1]['hash'] !== '');
         done();
       })
-      .error(console.log);
+      .error(function(error){
+        console.log('err', error);
+        assert(!error);
+        done();
+      });
   });
 
 });

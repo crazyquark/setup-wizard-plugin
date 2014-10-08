@@ -18,11 +18,11 @@ describe('Check for for Cold wallet\'s XRP balance', function(){
         assert.strictEqual(typeof Number(balance.cold_wallet_balance.value), 'number');
         done();
       })
-      .error(console.log);
+      .error(function(error){
+        console.log('error', error);
+        done();
+      });
   });
 
-  it('should return error on no ripple rest connection', function(done){
-    done();
-  })
 
 });

@@ -18,7 +18,7 @@ gatewaydSetupWizard.controller('SetupCtrl', ['$scope', '$rootScope', '$location'
       $scope.isSubmitting = !$scope.isSubmitting;
 
       if (error) {
-        return $scope.errors = error.message;
+        return $scope.errors.push(error);
       }
 
       if (response.success) {
