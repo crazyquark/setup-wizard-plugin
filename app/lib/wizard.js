@@ -290,7 +290,7 @@ Wizard.prototype._issueCurrency = function(config){
   };
 
   for (var currency in config.currencies) {
-    opts.amount = 1;
+    opts.amount = config.currencies[currency];
     opts.currency = currency;
   }
 
