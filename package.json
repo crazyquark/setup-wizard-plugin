@@ -1,11 +1,14 @@
 {
   "name": "gatewayd-setup-wizard-plugin",
-  "version": "2.0.4",
+  "version": "2.0.5",
+  "scripts": {
+    "test": "mocha -R spec test/ --timeout=3000"
+  },
   "dependencies": {
     "body-parser": "^1.6.5",
     "express": "^4.8.4",
     "async": "^0.9.0",
-    "ripple-rest-client": "^1.10.2",
+    "ripple-rest-client": "^1.11.0",
     "bluebird": "^2.3.5",
     "superagent": "^0.20.0",
     "lodash": "^2.4.1"
