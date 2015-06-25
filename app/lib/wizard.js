@@ -166,7 +166,7 @@ Wizard.prototype._setHotWallet = function(){
 Wizard.prototype._fundHotWallet = function (config){
   var _this = this;
   var payment = {
-    amount: 60*1000000,
+    amount: 60,
     currency: 'XRP',
     secret: config.cold_wallet_secret,
     destination_tag: 0
