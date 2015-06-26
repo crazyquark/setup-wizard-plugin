@@ -199,7 +199,8 @@ Wizard.prototype._updateAccountSettings = function (config) {
       secret: config.cold_wallet_secret,
       settings: {
           disallow_xrp: true,
-          require_destination_tag: true,
+          // TODO CS: Let's disable this for now
+          //require_destination_tag: true,
           default_ripple: true
         }
       }

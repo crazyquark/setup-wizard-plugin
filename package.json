@@ -1,6 +1,6 @@
 {
   "name": "gatewayd-setup-wizard-plugin",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "scripts": {
     "test": "mocha -R spec test/ --timeout=3000"
   },
