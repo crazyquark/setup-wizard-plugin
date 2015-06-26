@@ -46,6 +46,9 @@ Wizard.prototype.setup = function(config) {
       return _this._fundHotWallet(config);
     })
     .then(function(){
+      return _this._updateAccountSettings(config);
+    })
+    .then(function(){
       return _this._addCurrency(config);
     })
     .then(function(){
@@ -53,9 +56,6 @@ Wizard.prototype.setup = function(config) {
     })
     .then(function(){
       return _this._issueCurrency(config);
-    })
-    .then(function(){
-      return _this._updateAccountSettings(config);
     })
     .then(function(){
       return _this._setKey(config);
@@ -199,7 +199,8 @@ Wizard.prototype._updateAccountSettings = function (config) {
       secret: config.cold_wallet_secret,
       settings: {
           disallow_xrp: true,
-          require_destination_tag: true
+          require_destination_tag: true,
+          default_ripple: true
         }
       }
     },
@@ -209,8 +210,7 @@ Wizard.prototype._updateAccountSettings = function (config) {
         secret: _this.gatewayd.config.get('HOT_WALLET').secret,
         settings: {
           disallow_xrp: true,
-          require_destination_tag: true,
-          default_ripple: true
+          require_destination_tag: true
         }
       }
     }];
