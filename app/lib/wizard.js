@@ -37,6 +37,9 @@ Wizard.prototype.setup = function(config) {
       return _this._setColdWallet(config);
     })
     .then(function(){
+      return _this._fundColdWallet(config);
+    })
+    .then(function(){
       return _this._checkAccountBalance(config);
     })
     .then(function(){
@@ -174,6 +177,34 @@ Wizard.prototype._fundHotWallet = function (config){
 
   return new Promise(function(resolve, reject){
     _this.gatewayd.api.fundHotWallet(payment, function(error, payment){
+      if(error){
+        reject(error);
+      } else {
+        resolve({ hot_wallet: payment });
+      }
+    });
+  });
+
+};
+
+/**
+ * @describe Funds cold wallet with XRP from root account
+ * @function _fundColdWallet
+ * @param configProperties
+ 
+ * @private
+ */
+Wizard.prototype._fundColdWallet = function (config){
+  var _this = this;
+  var payment = {
+    amount: 999,
+    currency: 'XRP',
+    secret: 'masterpassphrase',
+    destination_tag: 0
+  };
+
+  return new Promise(function(resolve, reject){
+    _this.gatewayd.api.fundColdWallet(payment, function(error, payment){
       if(error){
         reject(error);
       } else {
