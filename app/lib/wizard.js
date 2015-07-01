@@ -242,8 +242,7 @@ Wizard.prototype._updateAccountSettings = function (config) {
         secret: _this.gatewayd.config.get('HOT_WALLET').secret,
         settings: {
           disallow_xrp: true,
-          require_destination_tag: true,
-          default_ripple: true
+          require_destination_tag: true
         }
       }
     }];
