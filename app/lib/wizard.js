@@ -208,7 +208,7 @@ Wizard.prototype._fundColdWallet = function (config){
       if(error){
         reject(error);
       } else {
-        resolve({ hot_wallet: payment });
+        resolve({ cold_wallet: payment });
       }
     });
   });
